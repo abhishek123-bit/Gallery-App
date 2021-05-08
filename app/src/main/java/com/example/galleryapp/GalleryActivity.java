@@ -6,6 +6,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 
+import android.app.Activity;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -108,15 +110,18 @@ public class GalleryActivity extends AppCompatActivity {
      * To show the dialog to add image
      */
     private void showAddImageDialog() {
+        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
         new AddImageDialog()
                 .showDialog(this, new AddImageDialog.OnCompleteListener() {
                     @Override
                     public void onImageAdd(Item item) {
+                        GalleryActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
                         inflateViewForItem(item);
                     }
 
                     @Override
                     public void onError(String error) {
+                        GalleryActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
                         new MaterialAlertDialogBuilder(GalleryActivity.this)
                                 .setTitle("Error")
                                 .setMessage(error)

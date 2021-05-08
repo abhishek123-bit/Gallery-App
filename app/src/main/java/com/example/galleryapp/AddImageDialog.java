@@ -2,6 +2,7 @@ package com.example.galleryapp;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.view.LayoutInflater;
@@ -80,6 +81,7 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
+                ((GalleryActivity)context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
             }
         });
     }
