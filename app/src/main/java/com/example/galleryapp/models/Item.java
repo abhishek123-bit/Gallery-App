@@ -9,15 +9,29 @@ public class Item {
     public Bitmap image;
     public int color;
     public String label;
+    public String url;
 
     /**
-     * @param image Store Image
-     * @param color Store Image color
-     * @param label Store Image label
+     * @param image Image
+     * @param color Image color
+     * @param label Image label
+     * @param url   Image Url
      */
-    public Item(Bitmap image, int color, String label) {
+    public Item(Bitmap image, int color, String label, String url) {
         this.image = image;
         this.color = color;
         this.label = label;
+        this.url = url;
+    }
+
+    /**
+     * @param color Image color
+     * @param label Image Label
+     * @param url   Image Url
+     */
+    public Item(int color, String label, String url) {
+        this.color = color;
+        this.label = label;
+        this.url = url;
     }
 }

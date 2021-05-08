@@ -4,43 +4,33 @@ import androidx.annotation.NonNull;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.palette.graphics.Palette;
 
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.galleryapp.databinding.ActivityGalleryBinding;
-import com.example.galleryapp.databinding.DialogAddImageBinding;
 import com.example.galleryapp.databinding.ItemCardBinding;
 import com.example.galleryapp.models.Item;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.mlkit.vision.common.InputImage;
-import com.google.mlkit.vision.label.ImageLabel;
-import com.google.mlkit.vision.label.ImageLabeler;
-import com.google.mlkit.vision.label.ImageLabeling;
-import com.google.mlkit.vision.label.defaults.ImageLabelerOptions;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class GalleryActivity extends AppCompatActivity {
     ActivityGalleryBinding b;
+    List<Item> itemList = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,105 +38,54 @@ public class GalleryActivity extends AppCompatActivity {
         b = ActivityGalleryBinding.inflate(getLayoutInflater());
         setContentView(b.getRoot());
 
-
-        String path = getCacheDir() + "/" + "image_manager_disk_cache" + "/";
-
-
-        File[] files = new File(path).listFiles();
-
-
-        for (File file1 : files) {
-            try {
-                if (file1.getName().equals("journal")) {
-                    continue;
-                }
-                Log.d("Abhi", "onCreate: "+file1);
-                Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file1));
-                ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
-
-                //Bind data
-                binding.fetchImage.setImageBitmap(bitmap);
-                b.linearLayout.addView(binding.getRoot());
-
-            } catch (FileNotFoundException e) {
-                Log.d("Abhi", "onCreate: ");
-                e.printStackTrace();
-            }
-        }
+        //Load data from sharedPreferences
+        loadSharedPreferenceData();
 
     }
 
-//Testing
-//    private void loadImages() {
-//
-//        DialogAddImageBinding binding=DialogAddImageBinding.inflate(getLayoutInflater());
-//        new MaterialAlertDialogBuilder(this, R.style.CustomDialogTheme)
-//                .setCancelable(false)
-//                .setView(binding.getRoot())
-//                .show();
-//        Glide.with(this)
-//                .asBitmap()
-//                .load("https://picsum.photos/1080")
-//                .skipMemoryCache(true)
-//                .diskCacheStrategy(DiskCacheStrategy.NONE)
-//                .listener(new RequestListener<Bitmap>() {
-//                    @Override
-//                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
-////                        b.loader.setVisibility(View.GONE);
-////                        b.title.setText(getString(R.string.loading_failed, e.toString()));
-//                        return true;
-//                    }
-//
-//                    @Override
-//                    public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-////                        b.loader.setVisibility(View.GONE);
-////                        b.title.setText(R.string.load_successfully);
-//                        binding.fetchImage.setImageBitmap(resource);
-////                        labelImage(resource );
-//
-////                        createPaletteAsync(resource);
-//                        return true;
-//                    }
-//                })
-//
-//                .into(binding.fetchImage);
-//    }
-//
-//    private void labelImage(Bitmap resource) {
-//        InputImage inputImage = InputImage.fromBitmap(resource, 0);
-//        ImageLabeler labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS);
-//
-//        labeler.process(inputImage)
-//                .addOnSuccessListener(new OnSuccessListener<List<ImageLabel>>() {
-//                    @Override
-//                    public void onSuccess(List<ImageLabel> labels) {
-//                        new MaterialAlertDialogBuilder(GalleryActivity.this)
-//                                .setTitle("label fetch")
-//                                .setMessage(labels.toString())
-//                                .show();
-//                    }
-//                })
-//                .addOnFailureListener(new OnFailureListener() {
-//                    @Override
-//                    public void onFailure(@NonNull Exception e) {
-//                        new MaterialAlertDialogBuilder(GalleryActivity.this, R.style.CustomDialogTheme)
-//                                .setTitle("Error")
-//                                .setMessage(e.toString())
-//                                .show();
-//                    }
-//                });
-//    }
-//
-//    public void createPaletteAsync(Bitmap bitmap) {
-//        Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
-//            public void onGenerated(Palette p) {
-//                new MaterialAlertDialogBuilder(GalleryActivity.this, R.style.CustomDialogTheme)
-//                        .setTitle("Palette")
-//                        .setMessage(p.getSwatches().toString())
-//                        .show();
-//            }
-//        });
-//    }
+    /**
+     * Load data from sharedPreferences
+     * Fetch Images from caches
+     */
+    private void loadSharedPreferenceData() {
+        String items = getPreferences(MODE_PRIVATE).getString("ITEMS", null);
+        if (items == null) {
+            return;
+        }
+
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<Item>>() {
+        }.getType();
+
+        itemList = gson.fromJson(items, type);
+
+        //Fetch data from caches
+        for (Item item : itemList) {
+            Glide.with(this)
+                    .asBitmap()
+                    .onlyRetrieveFromCache(true)
+                    .load(item.url)
+                    .into(new CustomTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
+                            Log.d("Abhi", "onResourceReady: ");
+                            binding.fetchImage.setImageBitmap(resource);
+                            binding.Title.setBackgroundColor(item.color);
+                            binding.Title.setText(item.label);
+                            b.linearLayout.addView(binding.getRoot());
+                        }
+
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                        }
+                    });
+
+        }
+
+
+    }
 
 
     @Override
@@ -186,8 +125,10 @@ public class GalleryActivity extends AppCompatActivity {
                     }
                 });
     }
+
     /**
      * To inflate the view for the incoming item
+     *
      * @param item {@link Item}
      */
     private void inflateViewForItem(Item item) {
@@ -200,6 +141,30 @@ public class GalleryActivity extends AppCompatActivity {
         binding.Title.setText(item.label);
 
         b.linearLayout.addView(binding.getRoot());
+
+        //Save Item
+        SaveDataInSharedPreference(item);
+    }
+
+    /**
+     * Save data in sharedPreferences
+     *
+     * @param item {@link Item}
+     */
+    private void SaveDataInSharedPreference(Item item) {
+        Item storeItem = new Item(item.color, item.label, item.url);
+
+        //StoreItem in sharedPreferences
+        Gson gson = new Gson();
+        String json;
+
+        if (itemList == null) {
+            itemList = new ArrayList<>();
+        }
+
+        itemList.add(storeItem);
+        json = gson.toJson(itemList);
+        getPreferences(MODE_PRIVATE).edit().putString("ITEMS", json).apply();
     }
 
 }

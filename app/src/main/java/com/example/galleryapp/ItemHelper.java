@@ -24,16 +24,18 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public class ItemHelper {
 
     private OnCompleteListener listener;
-    private String rectangularImageUrl = "https://picsum.photos/%d/%d";
-    private String squareImageUrl = "https://picsum.photos/%d";
+    private String rectangularImageUrl = "https://picsum.photos/%d/%d?type=" + UUID.randomUUID();
+    private String squareImageUrl = "https://picsum.photos/%d?type=" + UUID.randomUUID();
     private Context context;
     private Set<Integer> colors;
     private Bitmap bitmap;
     private List<String> labels;
+    private String url;
 
     /**
      * Fetch rectangular random image
@@ -46,7 +48,7 @@ public class ItemHelper {
     public void fetchData(int x, int y, Context context, OnCompleteListener listener) {
         this.context = context;
         this.listener = listener;
-
+        Log.d("Abhi", "fetchImage: " + String.format(rectangularImageUrl, x, y));
         //fetch rectangular image
         fetchImage(
                 String.format(rectangularImageUrl, x, y));
@@ -76,6 +78,8 @@ public class ItemHelper {
      * @param url Random Image URl
      */
     private void fetchImage(String url) {
+
+        this.url = url;
         //Fetch image by using glide library
         Glide.with(context)
                 .asBitmap()
@@ -84,6 +88,7 @@ public class ItemHelper {
                     //On image successfully fetch
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+
                         bitmap = resource;
 
                         //Get colors from image
@@ -140,7 +145,7 @@ public class ItemHelper {
                             ItemHelper.this.labels.add(imageLabel.getText());
                         }
                         //call onComplete listener
-                        listener.onFetch(bitmap, colors, ItemHelper.this.labels);
+                        listener.onFetch(bitmap, colors, ItemHelper.this.labels, url);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -183,14 +188,16 @@ public class ItemHelper {
         /**
          * Call when image all data fetch completely
          *
-         * @param bitmap       Store Image
-         * @param colorPalette Store Image colors
-         * @param labels       Store Image labels
+         * @param bitmap       Image
+         * @param colorPalette Image colors
+         * @param labels       Image labels
+         * @param url          Image url
          */
-        void onFetch(Bitmap bitmap, Set<Integer> colorPalette, List<String> labels);
+        void onFetch(Bitmap bitmap, Set<Integer> colorPalette, List<String> labels, String url);
 
         /**
          * Call when error come
+         *
          * @param exception Error
          */
         void onError(String exception);

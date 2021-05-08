@@ -31,6 +31,7 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
     private boolean isCustomLabel;
     private Bitmap image;
     private AlertDialog dialog;
+    private String url;
 
     /**
      * @param context  Activity state
@@ -151,40 +152,7 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
         new ItemHelper().fetchData(x, context, this);
     }
 
-    private void handelAddImageEvent() {
-        b.btnAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int chipLabelId = b.chipLabelGroup.getCheckedChipId(),
-                        chipPaletteId = b.chipPaletteGroup.getCheckedChipId();
 
-                if (chipLabelId == -1 || chipPaletteId == -1) {
-                    Toast.makeText(context, "Please select color & label", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                //Get color & label
-                String label;
-                if (isCustomLabel) {
-                    label = b.customLabel.getText().toString().trim();
-                    if (label.isEmpty()) {
-                        Toast.makeText(context, "Please enter custom label", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                } else {
-                    label = ((Chip) b.chipLabelGroup.findViewById(chipLabelId)).getText().toString();
-                }
-
-
-                int color = ((Chip) b.chipPaletteGroup.findViewById(chipPaletteId)).getChipBackgroundColor().getDefaultColor();
-
-                //Send callback
-                listener.onImageAdd(new Item(image, color, label));
-
-                dialog.dismiss();
-            }
-        });
-    }
 
     /**
      * Call when image all data fetch completely
@@ -194,8 +162,9 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
      * @param labels       Store Image labels
      */
     @Override
-    public void onFetch(Bitmap bitmap, Set<Integer> colorPalette, List<String> labels) {
+    public void onFetch(Bitmap bitmap, Set<Integer> colorPalette, List<String> labels,String url) {
         //call function
+        this.url =url;
         showData(bitmap, colorPalette, labels);
     }
 
@@ -273,6 +242,46 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 b.customInputLabel.setVisibility(isChecked ? View.VISIBLE : View.GONE);
                 isCustomLabel = isChecked;
+            }
+        });
+    }
+
+    /**
+     * Handle AddImage button
+     */
+    private void handelAddImageEvent() {
+        //click event on Add Butoon
+        b.btnAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int chipLabelId = b.chipLabelGroup.getCheckedChipId(),
+                        chipPaletteId = b.chipPaletteGroup.getCheckedChipId();
+
+                //check label and palette is selected or not
+                if (chipLabelId == -1 || chipPaletteId == -1) {
+                    Toast.makeText(context, "Please select color & label", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                //Get color & label
+                String label;
+                if (isCustomLabel) {
+                    label = b.customLabel.getText().toString().trim();
+                    if (label.isEmpty()) {
+                        Toast.makeText(context, "Please enter custom label", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                } else {
+                    label = ((Chip) b.chipLabelGroup.findViewById(chipLabelId)).getText().toString();
+                }
+
+
+                int color = ((Chip) b.chipPaletteGroup.findViewById(chipPaletteId)).getChipBackgroundColor().getDefaultColor();
+
+                //Send callback
+                listener.onImageAdd(new Item(image, color, label, url));
+
+                dialog.dismiss();
             }
         });
     }
