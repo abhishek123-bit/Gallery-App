@@ -12,6 +12,7 @@ import androidx.palette.graphics.Palette;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.example.galleryapp.databinding.ItemCardBinding;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.mlkit.vision.common.InputImage;
@@ -112,11 +113,39 @@ public class ItemHelper {
     }
 
     /**
+     * @param url      Image Url
+     * @param context  Activity state
+     * @param listener Complete event handler
+     */
+    public void editImage(String url, Context context, OnCompleteListener listener) {
+        this.context = context;
+        this.url = url;
+        this.listener = listener;
+        Glide.with(context)
+                .asBitmap()
+                .onlyRetrieveFromCache(true)
+                .load(url)
+                .into(new CustomTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        bitmap = resource;
+                        extraPaletteFromBitmap();
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                    }
+                });
+    }
+
+    /**
      * Fetch colors from image by using Palette library
      */
     private void extraPaletteFromBitmap() {
         Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
             public void onGenerated(Palette p) {
+
                 //call getColorsFromPalette function
                 colors = getColorsFromPalette(p);
 

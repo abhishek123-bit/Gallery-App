@@ -3,4 +3,5 @@
     <string name="loading_image">Loading Image…</string>
     <string name="loading_failed">Loading failed $1%s</string>
     <string name="load_successfully">This is a Random Image</string>
+    <string name="No_item">No items.\n Try adding from the action above</string>
 </resources>

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -33,12 +34,57 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
     private Bitmap image;
     private AlertDialog dialog;
     private String url;
+    private Item item;
+    private boolean isAlreadyChecked;
 
     /**
      * @param context  Activity state
      * @param listener Complete listener handler
      */
     public void showDialog(Context context, OnCompleteListener listener) {
+        if (!initializeDialog(context, listener))
+            return;
+
+        //Handle dimensions
+        handelDimensions();
+
+        //Handle cancel event
+        handelCancelButton();
+
+
+    }
+
+    /**
+     * Edit Image which is come from caches
+     *
+     * @param context  Activity state
+     * @param item     {@link Item }
+     * @param listener Complete listener handler
+     */
+
+    public void editFetchImage(Context context, Item item, OnCompleteListener listener) {
+        this.url = item.url;
+        this.item = item;
+        if (!initializeDialog(context, listener))
+            return;
+
+        b.DialogTitle.setText("Edit image");
+        b.btnAdd.setText("Edit");
+        b.loadingText.setText("Please wait...");
+
+        editImage(url);
+
+        //Handle cancel event
+        handelCancelButton();
+    }
+
+    /**
+     * Check Dialog Initialize or not
+     *
+     * @param context  Activity state
+     * @param listener Complete listener handler
+     */
+    private boolean initializeDialog(Context context, OnCompleteListener listener) {
         this.context = context;
         this.listener = listener;
 
@@ -54,7 +100,7 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
             dialog.dismiss();
             //call listener
             listener.onError("Cast Exception");
-            return;
+            return false;
         }
 
         //Show AlertDialog
@@ -62,14 +108,20 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
                 .setCancelable(false)
                 .setView(b.getRoot())
                 .show();
-
-        //Handle dimensions
-        handelDimensions();
-
-        //Handle cancel event
-        handelCancelButton();
+        return true;
+    }
 
 
+    /**
+     * Edit Image
+     *
+     * @param url Image Url
+     */
+    private void editImage(String url) {
+        b.inputDimensionsRoot.setVisibility(View.GONE);
+        b.progressIndiacatorRoot.setVisibility(View.VISIBLE);
+
+        new ItemHelper().editImage(url, context, this);
     }
 
     /**
@@ -81,7 +133,7 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
-                ((GalleryActivity)context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+                ((GalleryActivity) context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
             }
         });
     }
@@ -94,11 +146,11 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
         b.btnFetchImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Get height and idth
+                //Get height and width
                 String height = b.height.getText().toString().trim(),
                         width = b.width.getText().toString().trim();
 
-                //Check height and image
+                //Check height and width of image
                 if (height.isEmpty() && width.isEmpty()) {
                     b.height.setError("Please enter at least one dimension");
                     return;
@@ -113,7 +165,7 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
                 } else if (height.isEmpty()) {
                     fetchImage(Integer.parseInt(width));
                 } else {
-                    fetchImage(Integer.parseInt(height), Integer.parseInt(width));
+                    fetchImage(Integer.parseInt(width), Integer.parseInt(height));
                 }
 
                 //hide keyboard
@@ -138,10 +190,10 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
      * @param height Height of Image
      * @param width  Width of Image
      */
-    private void fetchImage(int height, int width) {
+    private void fetchImage(int width, int height) {
         //call fetchData function of ItemHelper class
         new ItemHelper().
-                fetchData(height, width, context, this);
+                fetchData(width, height, context, this);
     }
 
     /**
@@ -155,7 +207,6 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
     }
 
 
-
     /**
      * Call when image all data fetch completely
      *
@@ -164,9 +215,9 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
      * @param labels       Store Image labels
      */
     @Override
-    public void onFetch(Bitmap bitmap, Set<Integer> colorPalette, List<String> labels,String url) {
+    public void onFetch(Bitmap bitmap, Set<Integer> colorPalette, List<String> labels, String url) {
         //call function
-        this.url =url;
+        this.url = url;
         showData(bitmap, colorPalette, labels);
     }
 
@@ -193,14 +244,15 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
         //Inflate labelChip layout
         inflateLabelChips(labels);
 
-        //Handel Custom label
-        handelCustomLabel();
-
         //update views
         b.progressIndiacatorRoot.setVisibility(View.GONE);
         b.mainRoot.setVisibility(View.VISIBLE);
         b.customInputLabel.setVisibility(View.GONE);
         b.btnCancel.setVisibility(View.VISIBLE);
+
+        //Handel Custom label
+        handelCustomLabel();
+
 
         //Handel add Button
         handelAddImageEvent();
@@ -216,6 +268,14 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
             ChipColorBinding binding = ChipColorBinding.inflate(inflater);
             binding.getRoot().setChipBackgroundColor(ColorStateList.valueOf(color));
             this.b.chipPaletteGroup.addView(binding.getRoot());
+
+
+            //Edit Image
+            //select chip if color present
+            if (item != null && item.color == color) {
+                binding.getRoot().setChecked(true);
+                Log.d("Abhi", "inflatePaletteChips: ");
+            }
         }
     }
 
@@ -227,8 +287,17 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
     private void inflateLabelChips(List<String> labels) {
         for (String label : labels) {
             ChipLabelBinding binding = ChipLabelBinding.inflate(inflater);
+
             binding.getRoot().setText(label);
             this.b.chipLabelGroup.addView(binding.getRoot());
+
+            //Edit Image
+            //Select chip if label present
+            if (item != null && item.label.equals(label)) {
+                Log.d("Abhi", "inflateLabelChips: ");
+                binding.getRoot().setChecked(true);
+                isAlreadyChecked = true;
+            }
         }
     }
 
@@ -239,9 +308,20 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
         ChipLabelBinding binding = ChipLabelBinding.inflate(inflater);
         binding.getRoot().setText("Custom");
         b.chipLabelGroup.addView(binding.getRoot());
+
+        //Edit Image
+        //Check  chip label already selected or not
+        if (item != null && !isAlreadyChecked) {
+            binding.getRoot().setChecked(true);
+            b.customInputLabel.setVisibility(View.VISIBLE);
+            b.customLabel.setText(item.label);
+            isCustomLabel = true;
+        }
+
         binding.getRoot().setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
                 b.customInputLabel.setVisibility(isChecked ? View.VISIBLE : View.GONE);
                 isCustomLabel = isChecked;
             }
