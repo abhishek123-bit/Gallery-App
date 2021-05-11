@@ -2,17 +2,10 @@ package com.example.galleryapp;
 
 import androidx.annotation.NonNull;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 
-import android.app.Activity;
-import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -20,11 +13,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.example.galleryapp.databinding.ActivityGalleryBinding;
 import com.example.galleryapp.databinding.ItemCardBinding;
 import com.example.galleryapp.models.Item;
@@ -44,6 +34,7 @@ public class GalleryActivity extends AppCompatActivity {
     List<Item> removeItem;
     private boolean isEdited;
     private boolean isAdd;
+    int noOfImages = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,10 +85,9 @@ public class GalleryActivity extends AppCompatActivity {
             setupContextMenu(binding, b.linearLayout.getChildCount() - 2);
 
 
-
-
         }
 
+        noOfImages = itemList.size();
 
     }
 
@@ -169,19 +159,11 @@ public class GalleryActivity extends AppCompatActivity {
 
         removeItem.add(itemList.get(selectedPosition));
 
-        //check all child are Gone
-        int count = 0;
-        for (int i = 0; i < b.linearLayout.getChildCount(); i++) {
-            if (b.linearLayout.getChildAt(i).getVisibility() == View.GONE) {
-                Log.d("Abhi", "deleteImage: " + b.linearLayout.getChildAt(i).getVisibility());
-                count++;
-            }
-        }
-        //show heading
-        if (count == b.linearLayout.getChildCount()) {
+        --noOfImages;
+
+        if (noOfImages == 0) {
             b.heading.setVisibility(View.VISIBLE);
         }
-
     }
 
     /**
@@ -237,7 +219,9 @@ public class GalleryActivity extends AppCompatActivity {
      */
     private void inflateViewForItem(Item item) {
 
-        b.heading.setVisibility(View.GONE);
+        if (b.heading.getVisibility() == View.VISIBLE) {
+            b.heading.setVisibility(View.GONE);
+        }
         //Inflate layout
         ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
 
@@ -260,6 +244,8 @@ public class GalleryActivity extends AppCompatActivity {
         isAdd = true;
 
         setupContextMenu(binding, b.linearLayout.getChildCount() - 2);
+
+        noOfImages++;
     }
 
 
