@@ -81,7 +81,6 @@ public class GalleryActivity extends AppCompatActivity {
             Log.d("Abhi", "onResourceReady: " + item.label);
 
             b.linearLayout.addView(binding.getRoot());
-
             setupContextMenu(binding, b.linearLayout.getChildCount() - 2);
 
 
@@ -219,7 +218,7 @@ public class GalleryActivity extends AppCompatActivity {
      */
     private void inflateViewForItem(Item item) {
 
-        if (b.heading.getVisibility() == View.VISIBLE) {
+        if (noOfImages == 0) {
             b.heading.setVisibility(View.GONE);
         }
         //Inflate layout
@@ -266,7 +265,7 @@ public class GalleryActivity extends AppCompatActivity {
         }
 
         //save in SharedPreference
-        if (itemList != null && (isEdited || isAdd)) {
+        if (isEdited || isAdd) {
             Gson gson = new Gson();
             String json = gson.toJson(itemList);
             getPreferences(MODE_PRIVATE).edit().putString("ITEMS", json).apply();
