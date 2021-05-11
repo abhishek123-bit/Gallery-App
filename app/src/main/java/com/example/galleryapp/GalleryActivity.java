@@ -76,30 +76,23 @@ public class GalleryActivity extends AppCompatActivity {
 
         //Fetch data from caches
         for (Item item : itemList) {
+            ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
+
             Glide.with(this)
                     .asBitmap()
                     .onlyRetrieveFromCache(true)
                     .load(item.url)
-                    .into(new CustomTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                            ItemCardBinding binding = ItemCardBinding.inflate(getLayoutInflater());
-                            binding.fetchImage.setImageBitmap(resource);
-                            binding.Title.setBackgroundColor(item.color);
-                            binding.Title.setText(item.label);
+                    .into(binding.fetchImage);
 
-                            Log.d("Abhi", "onResourceReady: " +item.label);
+            binding.Title.setBackgroundColor(item.color);
+            binding.Title.setText(item.label);
 
-                            b.linearLayout.addView(binding.getRoot());
+            Log.d("Abhi", "onResourceReady: " + item.label);
 
-                            setupContextMenu(binding, b.linearLayout.getChildCount() - 2);
-                        }
+            b.linearLayout.addView(binding.getRoot());
 
-                        @Override
-                        public void onLoadCleared(@Nullable Drawable placeholder) {
+            setupContextMenu(binding, b.linearLayout.getChildCount() - 2);
 
-                        }
-                    });
 
 
 
@@ -166,9 +159,9 @@ public class GalleryActivity extends AppCompatActivity {
      * Delete Image
      */
     private void deleteImage() {
-        Log.d("Abhi", "deleteImage: " );
+        Log.d("Abhi", "deleteImage: ");
 
-        b.linearLayout.getChildAt(selectedPosition+1).setVisibility(View.GONE);
+        b.linearLayout.getChildAt(selectedPosition + 1).setVisibility(View.GONE);
 
         if (removeItem == null) {
             removeItem = new ArrayList<>();
@@ -177,15 +170,15 @@ public class GalleryActivity extends AppCompatActivity {
         removeItem.add(itemList.get(selectedPosition));
 
         //check all child are Gone
-        int count=0;
-        for (int i = 0; i <b.linearLayout.getChildCount() ; i++) {
-            if(b.linearLayout.getChildAt(i).getVisibility()==View.GONE){
-                Log.d("Abhi", "deleteImage: " +b.linearLayout.getChildAt(i).getVisibility());
-                 count++;
+        int count = 0;
+        for (int i = 0; i < b.linearLayout.getChildCount(); i++) {
+            if (b.linearLayout.getChildAt(i).getVisibility() == View.GONE) {
+                Log.d("Abhi", "deleteImage: " + b.linearLayout.getChildAt(i).getVisibility());
+                count++;
             }
         }
         //show heading
-        if(count==b.linearLayout.getChildCount()){
+        if (count == b.linearLayout.getChildCount()) {
             b.heading.setVisibility(View.VISIBLE);
         }
 
@@ -195,21 +188,18 @@ public class GalleryActivity extends AppCompatActivity {
      * Edit Image
      */
     private void editImage() {
-        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
         new AddImageDialog().editFetchImage(this, itemList.get(selectedPosition), new AddImageDialog.OnCompleteListener() {
             @Override
             public void onImageAdd(Item item) {
-                GalleryActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-                TextView textView = b.linearLayout.getChildAt(selectedPosition+1).findViewById(R.id.Title);
+                TextView textView = b.linearLayout.getChildAt(selectedPosition + 1).findViewById(R.id.Title);
                 textView.setText(item.label);
                 textView.setBackgroundColor(item.color);
-                itemList.set(selectedPosition, new Item(item.color,item.label,item.url));
-                isEdited=true;
+                itemList.set(selectedPosition, new Item(item.color, item.label, item.url));
+                isEdited = true;
             }
 
             @Override
             public void onError(String error) {
-                GalleryActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
 
 
             }
@@ -221,18 +211,16 @@ public class GalleryActivity extends AppCompatActivity {
      * To show the dialog to add image
      */
     private void showAddImageDialog() {
-        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+
         new AddImageDialog()
                 .showDialog(this, new AddImageDialog.OnCompleteListener() {
                     @Override
                     public void onImageAdd(Item item) {
-                        GalleryActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
                         inflateViewForItem(item);
                     }
 
                     @Override
                     public void onError(String error) {
-                        GalleryActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
                         new MaterialAlertDialogBuilder(GalleryActivity.this)
                                 .setTitle("Error")
                                 .setMessage(error)
@@ -269,7 +257,7 @@ public class GalleryActivity extends AppCompatActivity {
         }
 
         itemList.add(newItem);
-        isAdd=true;
+        isAdd = true;
 
         setupContextMenu(binding, b.linearLayout.getChildCount() - 2);
     }
@@ -292,16 +280,15 @@ public class GalleryActivity extends AppCompatActivity {
         }
 
         //save in SharedPreference
-        if (itemList != null&&(isEdited||isAdd)) {
+        if (itemList != null && (isEdited || isAdd)) {
             Gson gson = new Gson();
             String json = gson.toJson(itemList);
             getPreferences(MODE_PRIVATE).edit().putString("ITEMS", json).apply();
-            isAdd=false;
-            isEdited=false;
+            isAdd = false;
+            isEdited = false;
         }
 
     }
-
 
 
 }

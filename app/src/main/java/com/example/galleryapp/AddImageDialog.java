@@ -133,7 +133,6 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
-                ((GalleryActivity) context).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
             }
         });
     }
