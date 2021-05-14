@@ -35,6 +35,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="cloud"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
                 android:background="#F80808"
                 android:textAlignment="center"
                 android:textColor="@color/white" />

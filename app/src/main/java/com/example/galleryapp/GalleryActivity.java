@@ -81,7 +81,7 @@ public class GalleryActivity extends AppCompatActivity {
             Log.d("Abhi", "onResourceReady: " + item.label);
 
             b.linearLayout.addView(binding.getRoot());
-            setupContextMenu(binding, b.linearLayout.getChildCount() - 2);
+            setupContextMenu(binding, b.linearLayout.getChildCount() - 1);
 
 
         }
@@ -150,7 +150,7 @@ public class GalleryActivity extends AppCompatActivity {
     private void deleteImage() {
         Log.d("Abhi", "deleteImage: ");
 
-        b.linearLayout.getChildAt(selectedPosition + 1).setVisibility(View.GONE);
+        b.linearLayout.getChildAt(selectedPosition).setVisibility(View.GONE);
 
         if (removeItem == null) {
             removeItem = new ArrayList<>();
@@ -172,7 +172,7 @@ public class GalleryActivity extends AppCompatActivity {
         new AddImageDialog().editFetchImage(this, itemList.get(selectedPosition), new AddImageDialog.OnCompleteListener() {
             @Override
             public void onImageAdd(Item item) {
-                TextView textView = b.linearLayout.getChildAt(selectedPosition + 1).findViewById(R.id.Title);
+                TextView textView = b.linearLayout.getChildAt(selectedPosition ).findViewById(R.id.Title);
                 textView.setText(item.label);
                 textView.setBackgroundColor(item.color);
                 itemList.set(selectedPosition, new Item(item.color, item.label, item.url));
@@ -242,7 +242,7 @@ public class GalleryActivity extends AppCompatActivity {
         itemList.add(newItem);
         isAdd = true;
 
-        setupContextMenu(binding, b.linearLayout.getChildCount() - 2);
+        setupContextMenu(binding, b.linearLayout.getChildCount() - 1);
 
         noOfImages++;
     }
@@ -261,7 +261,7 @@ public class GalleryActivity extends AppCompatActivity {
 
             getPreferences(MODE_PRIVATE).edit().putString("ITEMS", json).apply();
 
-            finish();
+           finish();
         }
 
         //save in SharedPreference
