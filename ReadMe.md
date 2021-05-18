@@ -9,10 +9,9 @@ which fetch Random Images from url
 - Fetch labels from Random Image
 - Fetch images from cache memory
 - Edit image
-
 - Delete Image
-
-
+- Share Image
+- Add Image from files
 
 ## Previews of the application
 
