@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -109,6 +110,26 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
                 .setView(b.getRoot())
                 .show();
         return true;
+    }
+
+
+    /**
+     * @param context  Activity State
+     * @param path     Image Path
+     * @param listener Complete event handler
+     */
+    public void fetchImageFromFiles(Context context, String path, OnCompleteListener listener) {
+        if (!initializeDialog(context, listener))
+            return;
+
+        this.context = context;
+        this.listener = listener;
+        b.inputDimensionsRoot.setVisibility(View.GONE);
+        b.progressIndiacatorRoot.setVisibility(View.VISIBLE);
+        b.loadingText.setText("Please wait...");
+
+        new ItemHelper().fetchImageFromGallery(path, context, this);
+
     }
 
 

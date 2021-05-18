@@ -139,6 +139,34 @@ public class ItemHelper {
                 });
     }
 
+
+    /**
+     * @param path     Image path
+     * @param context  Activity state
+     * @param listener Complete event handler
+     */
+    public void fetchImageFromGallery(String path, Context context, OnCompleteListener listener) {
+        this.context = context;
+        this.url = path;
+        this.listener = listener;
+
+        Glide.with(context)
+                .asBitmap()
+                .load(url)
+                .into(new CustomTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        bitmap = resource;
+                        extraPaletteFromBitmap();
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                    }
+                });
+    }
+
     /**
      * Fetch colors from image by using Palette library
      */
