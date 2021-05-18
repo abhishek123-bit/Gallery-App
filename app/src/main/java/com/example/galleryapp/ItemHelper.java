@@ -30,8 +30,8 @@ import java.util.UUID;
 public class ItemHelper {
 
     private OnCompleteListener listener;
-    private String rectangularImageUrl = "https://picsum.photos/%d/%d?type=" + UUID.randomUUID();
-    private String squareImageUrl = "https://picsum.photos/%d?type=" + UUID.randomUUID();
+    private String rectangularImageUrl = "https://picsum.photos/%d/%d";
+    private String squareImageUrl = "https://picsum.photos/%d";
     private Context context;
     private Set<Integer> colors;
     private Bitmap bitmap;
@@ -80,36 +80,79 @@ public class ItemHelper {
      */
     private void fetchImage(String url) {
 
-        this.url = url;
-        //Fetch image by using glide library
-        Glide.with(context)
-                .asBitmap()
-                .load(url)
-                .into(new CustomTarget<Bitmap>() {
-                    //On image successfully fetch
-                    @Override
-                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+        //fetch Redirect Url
+        new RedirectURLHelper(new RedirectURLHelper.OnCompleteListener() {
+            @Override
+            public void fetchRedirectUrl(String redirectUrl) {
+                ItemHelper.this.url = redirectUrl;
 
-                        bitmap = resource;
+                //Fetch image by using glide library
+                Glide.with(context)
+                        .asBitmap()
+                        .load(redirectUrl)
+                        .into(new CustomTarget<Bitmap>() {
+                            //On image successfully fetch
+                            @Override
+                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
 
-                        //Get colors from image
-                        extraPaletteFromBitmap();
-                    }
+                                bitmap = resource;
 
-                    @Override
-                    public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                        super.onLoadFailed(errorDrawable);
+                                //Get colors from image
+                                extraPaletteFromBitmap();
+                            }
 
-                        //call onComplete listener
-                        listener.onError("Image load failed");
-                    }
+                            @Override
+                            public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                                super.onLoadFailed(errorDrawable);
 
-                    @Override
-                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                                //call onComplete listener
+                                listener.onError("Image load failed");
+                            }
 
-                    }
+                            @Override
+                            public void onLoadCleared(@Nullable Drawable placeholder) {
 
-                });
+                            }
+
+                        });
+            }
+
+            @Override
+            public void OnFail() {
+                listener.onError("Image load failed");
+            }
+        }).execute(url);
+
+//        this.url = url;
+//        //Fetch image by using glide library
+//        Glide.with(context)
+//                .asBitmap()
+//                .load(url)
+//                .into(new CustomTarget<Bitmap>() {
+//                    //On image successfully fetch
+//                    @Override
+//                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+//
+//                        bitmap = resource;
+//
+//                        //Get colors from image
+//                        extraPaletteFromBitmap();
+//                    }
+//
+//                    @Override
+//                    public void onLoadFailed(@Nullable Drawable errorDrawable) {
+//                        super.onLoadFailed(errorDrawable);
+//
+//                        //call onComplete listener
+//                        listener.onError("Image load failed");
+//                    }
+//
+//                    @Override
+//                    public void onLoadCleared(@Nullable Drawable placeholder) {
+//
+//                    }
+//
+//                });
     }
 
     /**

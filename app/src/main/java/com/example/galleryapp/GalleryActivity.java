@@ -9,6 +9,7 @@ import androidx.core.content.FileProvider;
 
 
 import android.Manifest;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -16,6 +17,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -187,7 +189,6 @@ public class GalleryActivity extends AppCompatActivity {
         ImageView imageView = b.linearLayout.getChildAt(selectedPosition).findViewById(R.id.fetchImage);
         Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
 
-
         Uri uri = getImageToShare(bitmap);
         Intent intent = new Intent(Intent.ACTION_SEND);
 
@@ -199,7 +200,6 @@ public class GalleryActivity extends AppCompatActivity {
 
         // calling startactivity() to share
         startActivity(Intent.createChooser(intent, "Share Via"));
-
     }
 
     /**
