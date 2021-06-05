@@ -38,6 +38,7 @@
                 android:text="cloud"
                 android:textAlignment="center"
                 android:textColor="@color/white" />
+
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

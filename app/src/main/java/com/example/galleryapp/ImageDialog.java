@@ -25,7 +25,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.util.List;
 import java.util.Set;
 
-public class AddImageDialog implements ItemHelper.OnCompleteListener {
+public class ImageDialog implements ItemHelper.OnCompleteListener {
 
     private Context context;
     private OnCompleteListener listener;
@@ -279,7 +279,7 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
     }
 
     /**
-     * Add palette in AddImageDialog
+     * Add palette in ImageDialog
      *
      * @param colors Image colors
      */
@@ -300,7 +300,7 @@ public class AddImageDialog implements ItemHelper.OnCompleteListener {
     }
 
     /**
-     * Add labels in AddImageDialog
+     * Add labels in ImageDialog
      *
      * @param labels Labels of image
      */

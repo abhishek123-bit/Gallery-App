@@ -2,6 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <item android:id="@+id/sort"
+        android:title="Sort"
+        android:icon="@drawable/ic_sort"
+        app:showAsAction="always"
+        />
+
     <item android:id="@+id/downloadPhoto"
         android:icon="@drawable/ic_download"
         app:showAsAction="always"
@@ -11,7 +17,17 @@
         android:id="@+id/addPhoto"
         android:icon="@drawable/ic_add_photo"
         app:showAsAction="always"
-        android:title="Photo from Files">
+        android:title="Photo from Files"/>
 
-    </item>
+    <item android:id="@+id/search"
+        android:title="Search"
+        android:icon="@drawable/ic_search"
+        app:showAsAction="collapseActionView"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        />
+    <item android:id="@+id/Drag"
+        android:title="Drag&amp;Drop"
+        app:showAsAction="collapseActionView"
+        />
+
 </menu>
