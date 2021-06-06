@@ -17,11 +17,13 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.Toast;
 
 
 import com.example.galleryapp.adapters.ImageAdapter;
@@ -52,7 +54,7 @@ public class GalleryActivity extends AppCompatActivity {
     private boolean isAdd;
     public ImageAdapter adapter;
     public boolean isEnable;
-
+    private Bitmap shareImage;
 
 
     @Override
@@ -121,6 +123,7 @@ public class GalleryActivity extends AppCompatActivity {
 
     /**
      * Inflate menu
+     *
      * @param menu items on action bar
      */
     private void createMenu(Menu menu) {
@@ -161,7 +164,7 @@ public class GalleryActivity extends AppCompatActivity {
             isEnable = true;
             invalidateOptionsMenu();
             return true;
-        } else if(item.getItemId()==R.id.Select){
+        } else if (item.getItemId() == R.id.Select) {
             isEnable = false;
             invalidateOptionsMenu();
             return true;
@@ -174,7 +177,7 @@ public class GalleryActivity extends AppCompatActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         if (isEnable) {
             menu.clear();
-            getMenuInflater().inflate(R.menu.drag_and_drop,menu);
+            getMenuInflater().inflate(R.menu.drag_and_drop, menu);
             getSupportActionBar().setTitle("Drag&Drop");
         } else {
             menu.clear();
@@ -257,11 +260,21 @@ public class GalleryActivity extends AppCompatActivity {
 
         //Take screenShort of cardView
         adapter.view.setDrawingCacheEnabled(true);
-        Bitmap bitmap = Bitmap.createBitmap(adapter.view.getDrawingCache());
+        shareImage = Bitmap.createBitmap(adapter.view.getDrawingCache());
         adapter.view.setDrawingCacheEnabled(false);
 
+        /**
+         * By using External Storage
+         */
+
+//      if (getImageToShareFromExternalStorage(shareImage) == null) {
+//            return;
+//        }
+
+
+        //By using Cache Storage
         //Path of image
-        Uri uri = getImageToShare(bitmap);
+        Uri uri = getImageToShareFromCache(shareImage);
         Intent intent = new Intent(Intent.ACTION_SEND);
 
         // putting uri of image to be shared
@@ -426,12 +439,12 @@ public class GalleryActivity extends AppCompatActivity {
     }
 
     /**
-     * Retrieving the url to share
+     * Save and Retrieving the Image from cache
      *
-     * @param bitmap Image
+     * @param bitmap Image which is share
      * @return Uri of file
      */
-    private Uri getImageToShare(Bitmap bitmap) {
+    private Uri getImageToShareFromCache(Bitmap bitmap) {
         File imagefolder = new File(getCacheDir(), "images");
         imagefolder.mkdirs();
         Uri uri = null;
@@ -446,6 +459,43 @@ public class GalleryActivity extends AppCompatActivity {
             uri = FileProvider.getUriForFile(this, "com.anni.shareimage.fileprovider", file);
         } catch (Exception e) {
             Log.d("Abhi", "getImageToShare: " + e.getMessage());
+        }
+        return uri;
+    }
+
+    /**
+     * Save and Retrieving the Image from ExternalStorage
+     *
+     * @param bitmap Image which is share
+     */
+    private Uri getImageToShareFromExternalStorage(Bitmap bitmap) {
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 200);
+            return null;
+        }
+        File path = Environment.getExternalStorageDirectory();
+        Log.d("Abhi", "saveImage: " + path.getAbsolutePath());
+        File sdir = new File(path.getAbsolutePath());
+
+
+        Uri uri = null;
+
+        try {
+            File file = new File(sdir, "save_images.png");
+            FileOutputStream outputStream = new FileOutputStream(file);
+
+            Log.d("Abhi", "getImageToShare: " + file.getPath());
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+            outputStream.flush();
+            outputStream.close();
+
+            uri = FileProvider.getUriForFile(this, "com.anni.shareimage.fileprovider", file);
+
+        } catch (Exception e) {
+            Log.d("Abhi", "saveImage: error " + e.getMessage());
+            e.printStackTrace();
         }
         return uri;
     }
@@ -486,6 +536,29 @@ public class GalleryActivity extends AppCompatActivity {
                 CropImage.activity()
                         .setGuidelines(CropImageView.Guidelines.ON)
                         .start(this);
+            }
+        }
+
+        //to share Image
+        if (requestCode == 200) {
+
+            if (grantResults.length > 0 &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                 //Path of image
+                Uri uri = getImageToShareFromExternalStorage(shareImage);
+                Intent intent = new Intent(Intent.ACTION_SEND);
+
+                // putting uri of image to be shared
+                intent.putExtra(Intent.EXTRA_STREAM, uri);
+
+                // setting type to image
+                intent.setType("image/jpeg");
+
+                // calling startactivity() to share
+                startActivity(Intent.createChooser(intent, "Share Via"));
+            }
+            else {
+                Toast.makeText(this, "Please Allow the permission", Toast.LENGTH_SHORT).show();
             }
         }
     }

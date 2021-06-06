@@ -26,7 +26,7 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         />
     <item android:id="@+id/Drag"
-        android:title="Drag&amp;Drop"
+        android:title="Enable Drag&amp;Drop"
         app:showAsAction="collapseActionView"
         />
 
