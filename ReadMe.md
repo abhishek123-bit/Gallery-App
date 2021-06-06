@@ -11,7 +11,7 @@
 - Add Image from files
 - Redirect Url option
 - Create Recycle view
-- Swip and Drag&Drop option
+- Swipe and Drag&Drop option
 - Sort data 
 - Search item
 
